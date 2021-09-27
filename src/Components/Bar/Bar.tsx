@@ -9,7 +9,7 @@ import Badge from '@mui/material/Badge';
 import SearchIcon from '@material-ui/icons/Search';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import {Button, ButtonGroup, Divider, Link, Popover, Typography} from '@mui/material';
-import {CEvents, TEvents} from "../../Types/Types";
+import {TEvents} from "../../Types/Types";
 import axios from "axios";
 import {makeStyles, Theme, createStyles} from "@material-ui/core";
 
@@ -67,7 +67,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-function getNumEvents(events:CEvents[]):number {
+function getNumEvents(events:TEvents[]):number {
     let activeEventNum = 0
     for (const event of events) {
         if (event.active) {
@@ -77,12 +77,12 @@ function getNumEvents(events:CEvents[]):number {
     return activeEventNum
 }
 
-function delEvents(events:CEvents[], setEvents:any):void {
+function delEvents(events:TEvents[], setEvents:any):void {
     events.splice(0, events.length)
     setEvents(events)
 }
 
-function activateEvents(events:CEvents[], setEvents:any):void {
+function activateEvents(events:TEvents[], setEvents:any):void {
     for (const event of events) {
         if (event.active) {
             event.active = false
