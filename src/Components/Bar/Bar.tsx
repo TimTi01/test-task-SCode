@@ -1,4 +1,4 @@
-import React, {createRef, FC, useEffect, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {alpha, styled} from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from "@mui/material/Box";
@@ -9,7 +9,7 @@ import Badge from '@mui/material/Badge';
 import SearchIcon from '@material-ui/icons/Search';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import {Button, ButtonGroup, Divider, Link, Popover, Typography} from '@mui/material';
-import {CEvents} from "../../Types/Types";
+import {CEvents, TEvents} from "../../Types/Types";
 import axios from "axios";
 import {makeStyles, Theme, createStyles} from "@material-ui/core";
 
@@ -67,9 +67,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
     },
 }));
 
-function getNumEvents(events:CEvents[]) {
-    debugger
-    return events.filter(event => event.active)
+function getNumEvents(events:CEvents[]):number {
+    let activeEventNum = 0
+    for (const event of events) {
+        if (event.active) {
+            activeEventNum++
+        }
+    }
+    return activeEventNum
 }
 
 function delEvents(events:CEvents[], setEvents:any):void {
@@ -77,11 +82,27 @@ function delEvents(events:CEvents[], setEvents:any):void {
     setEvents(events)
 }
 
+function activateEvents(events:CEvents[], setEvents:any):void {
+    for (const event of events) {
+        if (event.active) {
+            event.active = false
+        }
+    }
+    setEvents(events)
+}
+
+function getNewData(dataArr:TEvents[], events:TEvents[], setEvents:any) {
+    for (const item of dataArr) {
+        item.active = true
+        events.push(item)
+    }
+    return setEvents(events)
+}
+
 export const Bar:FC = () => {
     const classes = useStyle()
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const [events, setEvents] = useState<CEvents[]>([])
-    let refBox = createRef()
+    const [events, setEvents] = useState<TEvents[]>([])
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -94,9 +115,9 @@ export const Bar:FC = () => {
     const id = open ? 'simple-popover' : undefined;
 
     useEffect(() => {
-            axios.get('https://jsonplaceholder.typicode.com/posts?_limit=6')
-                .then(response => setEvents(response.data))
-    }, [])
+        axios.get('https://jsonplaceholder.typicode.com/posts?_limit=6')
+            .then(response => getNewData(response.data, events, setEvents))
+    }, [events])
 
     return (
         <Box sx={{flexGrow: 1}}>
@@ -115,7 +136,7 @@ export const Bar:FC = () => {
                         <Button variant="contained" onClick={() => delEvents(events, setEvents)}>
                             Удалить
                         </Button>
-                        <Button variant="contained" onClick={() => {}}>
+                        <Button variant="contained" onClick={() => activateEvents(events, setEvents)}>
                             Прочитать
                         </Button>
                     </ButtonGroup>
@@ -140,8 +161,8 @@ export const Bar:FC = () => {
                             horizontal: 'left',
                         }}
                     >
-                        <Box className={classes.box} ref={refBox}>
-                            {events.map((event: CEvents) => {
+                        <Box className={classes.box}>
+                            {events.map((event: TEvents) => {
                                 return (
                                     <Typography noWrap key={event.id}>
                                         {event.id}.
